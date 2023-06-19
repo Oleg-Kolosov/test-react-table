@@ -1,15 +1,13 @@
-const orderOptions = [
+export const ORDER_OPTIONS = [
     { value: 'asc', label: 'A-Z' },
     { value: 'desc', label: 'Z-A' },
 ];
-const completedOptions = [
+export const COMPLETED_OPTIONS = [
     { value: true, label: 'Completed' },
     { value: false, label: 'Uncompleted' },
     { value: null, label: 'All' },
 ];
-const sortOptions = [
+export const SORT_OPTIONS = [
     { value: 'id', label: 'Id' },
     { value: 'title', label: 'Title' },
 ];
-
-export { orderOptions, completedOptions, sortOptions };

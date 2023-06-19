@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { ChangeEvent, memo, useCallback } from 'react';
 import { CustomSelect } from '../components/CustomSelect';
 import { Table } from '../components/Table';
@@ -5,20 +6,29 @@ import { Pagination } from '../components/Pagination';
 import { useQuery } from 'react-query';
 import { fetchTodos } from '../services/jsonPlaceholderApi';
 import { useSearchParams } from 'react-router-dom';
-import { completedOptions, orderOptions, sortOptions } from '../options/options';
+import { ORDER_OPTIONS, SORT_OPTIONS, COMPLETED_OPTIONS } from '../constans/options';
 import { Input } from '../components/Input';
 import { useInput } from '../hooks/useInput';
+import {
+    COLUMNS,
+    DEFAULT_ORDER,
+    DEFAULT_PAGE,
+    QUERY_PARAMS,
+    SORT_TITLE,
+} from '../constans/constans';
 
-export const HomePage = memo(() => {
+const { SORT, ORDER, PAGE, COMPLETED, TITLE, USER_ID } = QUERY_PARAMS;
+
+const HomePage = () => {
     const searchInput = useInput();
     const searchValue = searchInput.value;
     const [searchParams, setSearchParams] = useSearchParams();
-    const sortParams = searchParams.get('sort') || 'title';
-    const orderParams = searchParams.get('order') || 'asc';
-    const pageParams = searchParams.get('page') || '1';
-    const completedParams = searchParams.get('completed') || null;
-    const titleParams = searchParams.get('title') || '';
-    const userIdParams = searchParams.get('userId') || '';
+    const sortParams = searchParams.get(SORT) || SORT_TITLE;
+    const orderParams = searchParams.get(ORDER) || DEFAULT_ORDER;
+    const pageParams = searchParams.get(PAGE) || DEFAULT_PAGE;
+    const completedParams = searchParams.get(COMPLETED) || null;
+    const titleParams = searchParams.get(TITLE) || '';
+    const userIdParams = searchParams.get(USER_ID) || '';
 
     const { data } = useQuery(
         [
@@ -46,22 +56,26 @@ export const HomePage = memo(() => {
         }
     );
 
+    const { data: response, headers = {} } = data || {};
+    const total = (headers['x-total-count'] as string) || 0;
+
     const handleSearchValue = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
             searchInput.onChange(event);
+            const value = event.target.value;
 
             const params = new URLSearchParams(searchParams);
-            params.set('page', '1');
+            params.set(PAGE, DEFAULT_PAGE);
 
-            if (event.target.value !== '') {
-                if (!isNaN(Number(event.target.value))) {
-                    params.set('userId', event.target.value);
+            if (value) {
+                if (!isNaN(Number(value))) {
+                    params.set(USER_ID, value);
                 } else {
-                    params.set('title', event.target.value);
+                    params.set(TITLE, value);
                 }
             } else {
-                params.delete('userId');
-                params.delete('title');
+                params.delete(USER_ID);
+                params.delete(TITLE);
             }
 
             setSearchParams(params);
@@ -72,12 +86,12 @@ export const HomePage = memo(() => {
     const handleCompleted = useCallback(
         (completed: boolean | null) => {
             const params = new URLSearchParams(searchParams);
-            params.set('page', '1');
+            params.set(PAGE, DEFAULT_PAGE);
 
             if (completed !== null) {
-                params.set('completed', String(completed));
+                params.set(COMPLETED, String(completed));
             } else {
-                params.delete('completed');
+                params.delete(COMPLETED);
             }
 
             setSearchParams(params);
@@ -88,8 +102,8 @@ export const HomePage = memo(() => {
     const handleSort = useCallback(
         (sort: string) => {
             const params = new URLSearchParams(searchParams);
-            params.set('page', '1');
-            params.set('sort', sort);
+            params.set(PAGE, DEFAULT_PAGE);
+            params.set(SORT, sort);
 
             setSearchParams(params);
         },
@@ -99,8 +113,8 @@ export const HomePage = memo(() => {
     const handleOrder = useCallback(
         (order: string) => {
             const params = new URLSearchParams(searchParams);
-            params.set('page', '1');
-            params.set('order', order);
+            params.set(PAGE, DEFAULT_PAGE);
+            params.set(ORDER, order);
 
             setSearchParams(params);
         },
@@ -110,7 +124,7 @@ export const HomePage = memo(() => {
     const handlePage = useCallback(
         (page: string) => {
             const params = new URLSearchParams(searchParams);
-            params.set('page', page);
+            params.set(PAGE, page);
 
             setSearchParams(params);
         },
@@ -127,28 +141,25 @@ export const HomePage = memo(() => {
                     value={searchValue}
                 />
                 <CustomSelect
-                    options={orderOptions}
+                    options={ORDER_OPTIONS}
                     onChange={handleOrder}
                     defaultValue={orderParams}
                 />
                 <CustomSelect
-                    options={completedOptions}
+                    options={COMPLETED_OPTIONS}
                     onChange={handleCompleted}
                     defaultValue={completedParams}
                 />
                 <CustomSelect
-                    options={sortOptions}
+                    options={SORT_OPTIONS}
                     onChange={handleSort}
                     defaultValue={sortParams}
                 />
             </div>
-            <Table columns={['Id', 'Name', 'Title', 'Completed']} items={data?.data} />
-            <Pagination
-                current={pageParams}
-                total={data?.headers['x-total-count']}
-                pageSize={15}
-                onClick={handlePage}
-            />
+            <Table columns={COLUMNS} items={response} />
+            <Pagination current={pageParams} total={total} pageSize={15} onClick={handlePage} />
         </div>
     );
-});
+};
+
+export default memo(HomePage);

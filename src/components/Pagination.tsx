@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 interface PaginationProps {
     current: string;
-    total: string;
+    total: string | 0;
     pageSize: number;
     onClick: (page: string) => void;
 }
