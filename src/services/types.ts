@@ -1,11 +1,11 @@
-export interface Todo {
+interface Todo {
     userId: number;
     id: number;
     title: string;
     completed: boolean;
 }
 
-export interface RequestParams {
+interface RequestQueryParams {
     _limit: number;
     _sort: string;
     _order: string;
@@ -14,3 +14,14 @@ export interface RequestParams {
     userId?: string;
     title_like?: string;
 }
+
+interface RequestParams {
+    titleParams: string;
+    userIdParams: string;
+    sortParams: string;
+    orderParams: string;
+    pageParams: string;
+    completedParams?: string | null;
+}
+
+export type { Todo, RequestQueryParams, RequestParams };

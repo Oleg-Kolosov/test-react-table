@@ -1,4 +1,4 @@
-import { RequestParams, Todo } from './types';
+import { RequestParams, RequestQueryParams, Todo } from './types';
 import axios from 'axios';
 
 const api = axios.create({
@@ -6,19 +6,14 @@ const api = axios.create({
 });
 
 export const fetchTodos = async ({
-    text,
+    titleParams,
+    userIdParams,
     sortParams,
     orderParams,
     pageParams,
     completedParams,
-}: {
-    text: string;
-    sortParams: string;
-    orderParams: string;
-    pageParams: string;
-    completedParams?: string | null;
-}) => {
-    const params: RequestParams = {
+}: RequestParams) => {
+    const params: RequestQueryParams = {
         _limit: 15,
         _sort: sortParams,
         _order: orderParams,
@@ -29,11 +24,14 @@ export const fetchTodos = async ({
         params.completed = completedParams;
     }
 
-    if (text !== '') {
-        if (!isNaN(Number(text))) {
-            params.userId = text;
-        } else {
-            params.title_like = text;
+    if (userIdParams !== '') {
+        if (!isNaN(Number(userIdParams))) {
+            params.userId = userIdParams;
+        }
+    }
+    if (titleParams !== '') {
+        if (isNaN(Number(titleParams))) {
+            params.title_like = titleParams;
         }
     }
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { ChangeEvent, useCallback, useMemo } from 'react';
 import { CustomSelect } from '../components/CustomSelect';
 import { Table } from '../components/Table';
 import { Pagination } from '../components/Pagination';
@@ -10,22 +10,65 @@ import { Input } from '../components/Input';
 import { useInput } from '../hooks/useInput';
 
 export const HomePage = () => {
-    const searchValue = useInput();
-    const text = searchValue.value;
-
+    const searchInput = useInput();
+    const searchValue = searchInput.value;
     const [searchParams, setSearchParams] = useSearchParams();
     const sortParams = searchParams.get('sort') || 'title';
     const orderParams = searchParams.get('order') || 'asc';
     const pageParams = searchParams.get('page') || '1';
     const completedParams = searchParams.get('completed') || null;
+    const titleParams = searchParams.get('title') || '';
+    const userIdParams = searchParams.get('userId') || '';
 
     const { data } = useQuery(
-        ['todos', sortParams, orderParams, pageParams, searchValue.value, completedParams],
-        () => fetchTodos({ text, sortParams, orderParams, pageParams, completedParams }),
+        [
+            'todos',
+            searchValue,
+            sortParams,
+            orderParams,
+            pageParams,
+            completedParams,
+            titleParams,
+            userIdParams,
+        ],
+        () =>
+            fetchTodos({
+                titleParams,
+                userIdParams,
+                sortParams,
+                orderParams,
+                pageParams,
+                completedParams,
+            }),
         {
             keepPreviousData: true,
             staleTime: 5000,
         }
+    );
+
+    const handleSearchValue = useCallback(
+        (event: ChangeEvent<HTMLInputElement>) => {
+            searchInput.onChange(event);
+
+            const params: URLSearchParamsInit = {
+                page: '1',
+                sort: sortParams,
+                order: orderParams,
+            };
+            if (completedParams) {
+                params.completed = completedParams;
+            }
+            if (event.target.value !== '') {
+                if (!isNaN(Number(event.target.value))) {
+                    params.userId = event.target.value;
+                } else {
+                    params.title = event.target.value;
+                }
+            }
+
+            setSearchParams(params);
+        },
+        [completedParams, orderParams, searchInput, setSearchParams, sortParams]
     );
 
     const handleCompleted = useCallback(
@@ -35,9 +78,17 @@ export const HomePage = () => {
             if (completed !== null) {
                 params.completed = String(completed);
             }
+
+            if (searchValue !== '') {
+                if (!isNaN(Number(searchValue))) {
+                    params.userId = searchValue;
+                } else {
+                    params.title = searchValue;
+                }
+            }
             setSearchParams(params);
         },
-        [setSearchParams, orderParams, sortParams]
+        [setSearchParams, orderParams, sortParams, searchValue]
     );
 
     const handleSort = useCallback(
@@ -47,10 +98,17 @@ export const HomePage = () => {
             if (completedParams) {
                 params.completed = completedParams;
             }
+            if (searchValue !== '') {
+                if (!isNaN(Number(searchValue))) {
+                    params.userId = searchValue;
+                } else {
+                    params.title = searchValue;
+                }
+            }
 
             setSearchParams(params);
         },
-        [setSearchParams, orderParams, completedParams]
+        [orderParams, completedParams, searchValue, setSearchParams]
     );
 
     const handleOrder = useCallback(
@@ -60,10 +118,17 @@ export const HomePage = () => {
             if (completedParams) {
                 params.completed = completedParams;
             }
+            if (searchValue !== '') {
+                if (!isNaN(Number(searchValue))) {
+                    params.userId = searchValue;
+                } else {
+                    params.title = searchValue;
+                }
+            }
 
             setSearchParams(params);
         },
-        [setSearchParams, sortParams, completedParams]
+        [sortParams, completedParams, searchValue, setSearchParams]
     );
 
     const handlePage = useCallback(
@@ -77,16 +142,28 @@ export const HomePage = () => {
             if (completedParams) {
                 params.completed = completedParams;
             }
+            if (searchValue !== '') {
+                if (!isNaN(Number(searchValue))) {
+                    params.userId = searchValue;
+                } else {
+                    params.title = searchValue;
+                }
+            }
 
             setSearchParams(params);
         },
-        [setSearchParams, sortParams, orderParams, completedParams]
+        [sortParams, orderParams, completedParams, searchValue, setSearchParams]
     );
 
     return (
         <div className="max-w-2xl p-5 gap-3 flex items-center flex-col mx-auto">
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Input type="text" placeholder="id or title" {...searchValue} />
+                <Input
+                    type="text"
+                    placeholder="id or title"
+                    onChange={handleSearchValue}
+                    value={searchValue}
+                />
                 <CustomSelect
                     options={orderOptions}
                     onChange={handleOrder}
