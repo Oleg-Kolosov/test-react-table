@@ -1,4 +1,4 @@
-import { Todo } from './types';
+import { RequestParams, Todo } from './types';
 import axios from 'axios';
 
 const api = axios.create({
@@ -6,34 +6,36 @@ const api = axios.create({
 });
 
 export const fetchTodos = async ({
+    text,
     sortParams,
     orderParams,
     pageParams,
     completedParams,
 }: {
+    text: string;
     sortParams: string;
     orderParams: string;
     pageParams: string;
     completedParams?: string | null;
 }) => {
-    const params: any = {
+    const params: RequestParams = {
         _limit: 15,
         _sort: sortParams,
         _order: orderParams,
         _page: pageParams,
     };
 
-    if (typeof completedParams === 'string') {
+    if (completedParams !== null) {
         params.completed = completedParams;
     }
 
-    // if (searchValue !== '') {
-    //     if (!isNaN(Number(searchValue))) {
-    //         params.userId = searchValue;
-    //     } else {
-    //         params.title = searchValue;
-    //     }
-    // }
+    if (text !== '') {
+        if (!isNaN(Number(text))) {
+            params.userId = text;
+        } else {
+            params.title_like = text;
+        }
+    }
 
     const response = await api.get<Todo[]>('todos', { params });
 

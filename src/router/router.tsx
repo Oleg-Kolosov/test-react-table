@@ -6,6 +6,7 @@ export const router = createBrowserRouter(
         <>
             <Route path="/" element={<Navigate to="/todos?page=1&sort=title&order=asc" />} />
             <Route index path="todos" element={<HomePage />} />
+            <Route path="*" element={<Navigate to="/" />} />
         </>
     )
 );

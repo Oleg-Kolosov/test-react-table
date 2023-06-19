@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { CustomSelect } from '../components/CustomSelect';
 import { Table } from '../components/Table';
 import { Pagination } from '../components/Pagination';
@@ -6,8 +6,13 @@ import { useQuery } from 'react-query';
 import { fetchTodos } from '../services/jsonPlaceholderApi';
 import { URLSearchParamsInit, useSearchParams } from 'react-router-dom';
 import { completedOptions, orderOptions, sortOptions } from '../options/options';
+import { Input } from '../components/Input';
+import { useInput } from '../hooks/useInput';
 
 export const HomePage = () => {
+    const searchValue = useInput();
+    const text = searchValue.value;
+
     const [searchParams, setSearchParams] = useSearchParams();
     const sortParams = searchParams.get('sort') || 'title';
     const orderParams = searchParams.get('order') || 'asc';
@@ -15,10 +20,11 @@ export const HomePage = () => {
     const completedParams = searchParams.get('completed') || null;
 
     const { data } = useQuery(
-        ['todos', sortParams, orderParams, pageParams, completedParams],
-        () => fetchTodos({ sortParams, orderParams, pageParams, completedParams }),
+        ['todos', sortParams, orderParams, pageParams, searchValue.value, completedParams],
+        () => fetchTodos({ text, sortParams, orderParams, pageParams, completedParams }),
         {
             keepPreviousData: true,
+            staleTime: 5000,
         }
     );
 
@@ -80,7 +86,7 @@ export const HomePage = () => {
     return (
         <div className="max-w-2xl p-5 gap-3 flex items-center flex-col mx-auto">
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input type="text" placeholder="id or title" />
+                <Input type="text" placeholder="id or title" {...searchValue} />
                 <CustomSelect
                     options={orderOptions}
                     onChange={handleOrder}

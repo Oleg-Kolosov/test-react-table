@@ -4,8 +4,8 @@ interface CustomSelectProps {
     options: any[];
     isMulti?: boolean;
     isSearchable?: boolean;
-    onChange: (order: any) => void;
-    defaultValue?: any;
+    onChange: (value: any) => void;
+    defaultValue?: string | null;
 }
 
 export const CustomSelect = ({
