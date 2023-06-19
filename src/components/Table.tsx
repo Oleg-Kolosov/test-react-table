@@ -1,12 +1,13 @@
 import { Todo } from '../services/types';
 import { truncateString } from '../helpers/truncatString';
+import { memo } from 'react';
 
 interface TableProps {
     columns: string[];
     items: Todo[] | undefined;
 }
 
-export const Table = ({ columns, items }: TableProps) => {
+export const Table = memo(({ columns, items }: TableProps) => {
     return (
         <table className="grid grid-cols-1 w-full border-collapse border border-slate-300">
             <thead>
@@ -37,4 +38,4 @@ export const Table = ({ columns, items }: TableProps) => {
             </tbody>
         </table>
     );
-};
+});

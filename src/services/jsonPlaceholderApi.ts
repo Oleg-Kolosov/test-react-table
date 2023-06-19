@@ -6,34 +6,27 @@ const api = axios.create({
 });
 
 export const fetchTodos = async ({
-    titleParams,
-    userIdParams,
+    titleParams = '',
+    userIdParams = '',
     sortParams,
     orderParams,
     pageParams,
     completedParams,
 }: RequestParams) => {
+    const { completed = null, ...rest } = {
+        completed: completedParams,
+        ...(userIdParams !== '' && !isNaN(Number(userIdParams)) && { userId: userIdParams }),
+        ...(titleParams !== '' && isNaN(Number(titleParams)) && { title_like: titleParams }),
+    };
+
     const params: RequestQueryParams = {
         _limit: 15,
         _sort: sortParams,
         _order: orderParams,
         _page: pageParams,
+        ...(completed !== null && { completed }),
+        ...rest,
     };
-
-    if (completedParams !== null) {
-        params.completed = completedParams;
-    }
-
-    if (userIdParams !== '') {
-        if (!isNaN(Number(userIdParams))) {
-            params.userId = userIdParams;
-        }
-    }
-    if (titleParams !== '') {
-        if (isNaN(Number(titleParams))) {
-            params.title_like = titleParams;
-        }
-    }
 
     const response = await api.get<Todo[]>('todos', { params });
 

@@ -1,15 +1,15 @@
-import { ChangeEvent, useCallback, useMemo } from 'react';
+import { ChangeEvent, memo, useCallback } from 'react';
 import { CustomSelect } from '../components/CustomSelect';
 import { Table } from '../components/Table';
 import { Pagination } from '../components/Pagination';
 import { useQuery } from 'react-query';
 import { fetchTodos } from '../services/jsonPlaceholderApi';
-import { URLSearchParamsInit, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { completedOptions, orderOptions, sortOptions } from '../options/options';
 import { Input } from '../components/Input';
 import { useInput } from '../hooks/useInput';
 
-export const HomePage = () => {
+export const HomePage = memo(() => {
     const searchInput = useInput();
     const searchValue = searchInput.value;
     const [searchParams, setSearchParams] = useSearchParams();
@@ -50,109 +50,71 @@ export const HomePage = () => {
         (event: ChangeEvent<HTMLInputElement>) => {
             searchInput.onChange(event);
 
-            const params: URLSearchParamsInit = {
-                page: '1',
-                sort: sortParams,
-                order: orderParams,
-            };
-            if (completedParams) {
-                params.completed = completedParams;
-            }
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
+
             if (event.target.value !== '') {
                 if (!isNaN(Number(event.target.value))) {
-                    params.userId = event.target.value;
+                    params.set('userId', event.target.value);
                 } else {
-                    params.title = event.target.value;
+                    params.set('title', event.target.value);
                 }
+            } else {
+                params.delete('userId');
+                params.delete('title');
             }
 
             setSearchParams(params);
         },
-        [completedParams, orderParams, searchInput, setSearchParams, sortParams]
+        [searchInput, searchParams, setSearchParams]
     );
 
     const handleCompleted = useCallback(
         (completed: boolean | null) => {
-            const params: URLSearchParamsInit = { page: '1', sort: sortParams, order: orderParams };
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
 
             if (completed !== null) {
-                params.completed = String(completed);
+                params.set('completed', String(completed));
+            } else {
+                params.delete('completed');
             }
 
-            if (searchValue !== '') {
-                if (!isNaN(Number(searchValue))) {
-                    params.userId = searchValue;
-                } else {
-                    params.title = searchValue;
-                }
-            }
             setSearchParams(params);
         },
-        [setSearchParams, orderParams, sortParams, searchValue]
+        [searchParams, setSearchParams]
     );
 
     const handleSort = useCallback(
         (sort: string) => {
-            const params: URLSearchParamsInit = { page: '1', sort, order: orderParams };
-
-            if (completedParams) {
-                params.completed = completedParams;
-            }
-            if (searchValue !== '') {
-                if (!isNaN(Number(searchValue))) {
-                    params.userId = searchValue;
-                } else {
-                    params.title = searchValue;
-                }
-            }
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
+            params.set('sort', sort);
 
             setSearchParams(params);
         },
-        [orderParams, completedParams, searchValue, setSearchParams]
+        [searchParams, setSearchParams]
     );
 
     const handleOrder = useCallback(
         (order: string) => {
-            const params: URLSearchParamsInit = { page: '1', sort: sortParams, order };
-
-            if (completedParams) {
-                params.completed = completedParams;
-            }
-            if (searchValue !== '') {
-                if (!isNaN(Number(searchValue))) {
-                    params.userId = searchValue;
-                } else {
-                    params.title = searchValue;
-                }
-            }
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
+            params.set('order', order);
 
             setSearchParams(params);
         },
-        [sortParams, completedParams, searchValue, setSearchParams]
+        [searchParams, setSearchParams]
     );
 
     const handlePage = useCallback(
         (page: string) => {
-            const params: URLSearchParamsInit = {
-                page,
-                sort: sortParams,
-                order: orderParams,
-            };
-
-            if (completedParams) {
-                params.completed = completedParams;
-            }
-            if (searchValue !== '') {
-                if (!isNaN(Number(searchValue))) {
-                    params.userId = searchValue;
-                } else {
-                    params.title = searchValue;
-                }
-            }
+            const params = new URLSearchParams(searchParams);
+            params.set('page', page);
 
             setSearchParams(params);
         },
-        [sortParams, orderParams, completedParams, searchValue, setSearchParams]
+        [searchParams, setSearchParams]
     );
 
     return (
@@ -180,7 +142,6 @@ export const HomePage = () => {
                     defaultValue={sortParams}
                 />
             </div>
-
             <Table columns={['Id', 'Name', 'Title', 'Completed']} items={data?.data} />
             <Pagination
                 current={pageParams}
@@ -190,4 +151,4 @@ export const HomePage = () => {
             />
         </div>
     );
-};
+});

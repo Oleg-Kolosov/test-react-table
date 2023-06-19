@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface PaginationProps {
     current: string;
     total: string;
@@ -5,7 +7,10 @@ interface PaginationProps {
     onClick: (page: string) => void;
 }
 
-export const Pagination = ({ current, total, pageSize, onClick }: PaginationProps) => {
+export const Pagination = memo(({ current, total, pageSize, onClick }: PaginationProps) => {
+    if (+total === 0) {
+        return;
+    }
     return (
         <ul className="flex gap-2 flex-wrap">
             {Array.from({ length: Math.ceil(+total / pageSize) }, (_, i) => i + 1).map(i => {
@@ -24,4 +29,4 @@ export const Pagination = ({ current, total, pageSize, onClick }: PaginationProp
             })}
         </ul>
     );
-};
+});
