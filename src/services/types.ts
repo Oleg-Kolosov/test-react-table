@@ -21,7 +21,7 @@ interface RequestParams {
     sortParams: string;
     orderParams: string;
     pageParams: string;
-    completedParams?: string | null;
+    completedParams: string | null;
 }
 
 export type { Todo, RequestQueryParams, RequestParams };
